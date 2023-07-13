@@ -1,8 +1,9 @@
-from rest_framework import serializers
-from authservice.models import User
-from utils.validators import is_strong_password
 from django.utils import timezone
-
+from authservice.exceptions import RestValidationError
+from authservice.models import User
+from rest_framework import serializers
+from django.contrib.auth import authenticate
+from utils.validators import is_strong_password
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -41,3 +42,17 @@ class UserRegistrationSerializer(UserSerializer):
         user.save()
         return user
 
+class UserLoginSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True,style={"input":"text","placeholder":"Enter your email"})
+    password = serializers.CharField(style={"input":"password","placeholder":"Enter your password here"})
+
+    def get_user(self) -> User:
+        kwargs = self.data
+        super().validate(kwargs)
+        email = kwargs["email"]
+        password = kwargs["password"]
+        user = authenticate(email=email,password=password)
+        if not user: 
+            raise RestValidationError("Wrong email/password.")
+        return user
+        
