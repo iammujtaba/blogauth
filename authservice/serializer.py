@@ -4,6 +4,8 @@ from authservice.models import User
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from utils.validators import is_strong_password
+from authtoken.models import AuthToken
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,7 +54,8 @@ class UserLoginSerializer(serializers.Serializer):
         email = kwargs["email"]
         password = kwargs["password"]
         user = authenticate(email=email,password=password)
-        if not user: 
+        if not user:
             raise RestValidationError("Wrong email/password.")
-        return user
+
+        return AuthToken.objects.create_token(user)
         

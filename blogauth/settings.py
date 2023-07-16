@@ -23,12 +23,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("DJ_SECRET_KEY",'ThisIsNotASecretKey')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
+
+EXTERNAL_APPS = ['rest_framework']
+INTERNAL_APPS = ['authservice','authtoken']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -37,9 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'authservice',
-    'rest_framework',
-]
+] + INTERNAL_APPS + EXTERNAL_APPS
 
 
 MIDDLEWARE = [
@@ -134,8 +135,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ]
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    )
 }
+
+ACCESS_TOKEN_TIMEOUT = 12*3600 #12 hours
+REFRESH_TOKEN_TIMEOUT = 10*24*3600 # 10days
